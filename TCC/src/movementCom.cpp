@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define ACTIVE_B 9
+
 void sendMoveForward(int trigger_speed){
     char bufferOut[15];
     char str_trigger_speed[4];
@@ -105,5 +107,5 @@ void sendMoveBackLeft(float analog_direction, float trigger_speed){
 }
 
 void sendMotorStop(){
-    Serial1.println("para!" + '\0');
+    Serial1.println("para!");
 }

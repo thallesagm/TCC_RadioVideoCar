@@ -82,7 +82,6 @@ void moveBackLeft(float analog_direction, float trigger_speed){
 }
 
 void motorInitialize(){
-
   pinMode(PIN_MOTOR_A1, OUTPUT);
   pinMode(PIN_MOTOR_A2, OUTPUT);
   pinMode(PIN_MOTOR_B1,OUTPUT);

@@ -20,7 +20,7 @@ XboxSeriesXHIDReportBuilder_asukiaaa::ReportBase repo;
 // any xbox controller
 // XboxSeriesXControllerESP32_asukiaaa::Core xboxController;
 
-void movementFeedback(float trigger_speed, bool side){
+void movementFeedback(bool side){
     // SIDE: right = true / left = false
     repo.v.select.center = true;
     repo.v.select.shake = true;
@@ -78,7 +78,7 @@ void handleXboxController(void * parameter){
                         sendMoveForwardRight(analog_direction, trigger_speed);
                     } else
                         sendMoveForward(trigger_speed);
-                    movementFeedback(trigger_speed, true);
+                    movementFeedback(true);
                 } else 
                 if((float)xboxController.xboxNotif.trigLT>0){
                     trigger_speed = (float)xboxController.xboxNotif.trigLT*TO_PWM;
@@ -92,7 +92,7 @@ void handleXboxController(void * parameter){
                         sendMoveBackRight(analog_direction, trigger_speed);
                     } else
                         sendMoveBack(trigger_speed);
-                    movementFeedback(trigger_speed, false);
+                    movementFeedback(false);
                 } else {sendMotorStop();}
             }
         }else{

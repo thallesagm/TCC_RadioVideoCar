@@ -3,77 +3,96 @@
 #include <stdlib.h>
 #include "movement.h"
 
-#include "BluetoothSerial.h"
-
 #define MAX_MESSAGE_LENGTH 20
 
 void handlesCommand (char * command){
-    if(!strcmp(command, "para!")){
+    if(strncmp(command, "para!", 5) == 0){
         motorStop();
-        pinMode(12, OUTPUT);
-        digitalWrite(12, HIGH);
+        analogWrite(4, 0);
     } else
     if(strchr(command, '#') != NULL){
-        pinMode(13, OUTPUT);
-        digitalWrite(13, HIGH);
         strtok(command, "#");
-        if(!strcmp(command, "frente")){
-            int trigger_speed = atoi(strtok(NULL, "!"));
-            moveForward(trigger_speed);
-        } else
-        if(!strcmp(command, "tras")){
-            int trigger_speed = atoi(strtok(NULL,"!"));
-            moveBack(trigger_speed);
-        } else
-        if(strcmp(command,"frente_d") == 0){
+        if(strncmp(command,"frente_d", 8) == 0){
             int trigger_speed = atoi(strtok(NULL,"#"));
             int analog_direction = atoi(strtok(NULL, "!"));
+            int light = trigger_speed/60;
+            analogWrite(4, light);
             moveForwardRight(analog_direction, trigger_speed);
         } else
-        if(strcmp(command,"frente_e") == 0){
+        if(strncmp(command,"frente_e", 8) == 0){
             int trigger_speed = atoi(strtok(NULL,"#"));
             int analog_direction = atoi(strtok(NULL,"!"));
+            int light = trigger_speed/60;
+            analogWrite(4, light);
             moveForwardLeft(analog_direction, trigger_speed);
         } else
-        if(strcmp(command,"tras_d") == 0){
+        if(strncmp(command,"tras_d", 6) == 0){
             int trigger_speed = atoi(strtok(NULL,"#"));
             int analog_direction = atoi(strtok(NULL,"!"));
-            moveForwardRight(analog_direction, trigger_speed);
+            moveBackRight(analog_direction, trigger_speed);
+        } else
+        if(strncmp(command,"tras_e", 6) == 0){
+            int trigger_speed = atoi(strtok(NULL,"#"));
+            int analog_direction = atoi(strtok(NULL,"!"));
+            moveBackLeft(analog_direction, trigger_speed);
+        } else
+        if(strncmp(command, "frente", 6) == 0){
+            int trigger_speed = atoi(strtok(NULL, "!"));
+            int light = trigger_speed/60;
+            analogWrite(4, light);
+            moveForward(trigger_speed);
+        } else
+        if(strncmp(command, "tras", 4) == 0){
+            int trigger_speed = atoi(strtok(NULL,"!"));
+            moveBack(trigger_speed);
         }
     } else {
-        pinMode(12, OUTPUT);
-        digitalWrite(12, LOW);
-        pinMode(13, OUTPUT);
-        digitalWrite(13, LOW);
+        motorStop();
+        analogWrite(4, 0);
     }
 } 
 
+char http_command[32] = {0,};
+int handlesHTTPCommand(char * variable){
+    strcpy(http_command, variable);
+    if(!strcmp(variable, "accelerate")) {
+        moveForward(200);
+        return 0;
+    }
+    else 
+    if(!strcmp(variable, "reverse")) {
+        moveBack(200);
+        return 0;
+    }
+    else 
+    // if(!strcmp(variable, "stop")) {
+    //     motorStop();
+    //     return 0;
+    // }
+    // else
+    if(!strcmp(variable, "left")){
+        moveForwardLeft(0, 220);
+        return 0;
+    }
+    else 
+    if(!strcmp(variable, "right")){
+        moveForwardRight(0, 220);
+        return 0;
+    }
+    else {
+        return -1;
+    }
+}
+
+
 void serialReceiver (void * parameter){
-    BluetoothSerial SerialBT;
-    SerialBT.begin("ESP32_CAM");
     while(1){
+        if (handlesHTTPCommand(http_command) == 0){
+            // NADA
+        } else
         if (Serial1.available() > 0){
             String message = Serial1.readStringUntil('\n');
-
-            //PRINT PARA VERIFICAR SE ESTA RECEBENDO (ESTÁ OK!)
-            SerialBT.println(message);
-
-            //COMPARAÇÕES DO QUE FOI RECEBIDO ABAIXO:
-            if(message == "para!"){
-                SerialBT.println("PRIMEIRO");
-            }
-
-            if(strcmp(message.c_str(), "para!") == 0){
-                SerialBT.println("SEGUNDO");
-            }
-            
-            if(message.equals("para!")){
-                SerialBT.println("TERCEIRO");
-            }
-
-        
-        //handlesCommand((char *)message.c_str());
-
-        }   
+            handlesCommand((char *)message.c_str());
+        } 
     }
 }
